@@ -1,8 +1,8 @@
 <?php 
 int $a, $b, $c = $b; 
 $a=$b=5; 
-function Fubfgs(int $a){ 
-$a+=$b; 
+function Fubfgs(int $ty){ 
+$a+=$ty; 
 } 
 for(;$a==$b;){ 
 int $c; 

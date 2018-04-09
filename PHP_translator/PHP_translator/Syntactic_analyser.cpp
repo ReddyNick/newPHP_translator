@@ -87,7 +87,6 @@ void variable_definition() {
 	Check(";");
 }
 void expression() {
-	//if (lex.name != ";")
 	if (lex.name == "$" || lex.name == "(" || lex.id == 3 || lex.id == 2)
 		unempty_expression();
 }
@@ -535,25 +534,58 @@ void function_definition() {
 	if (lex.id == 2)
 		in >> lex;
 	Check("(");
-	arguments();
-	Check(")");
 	int local_1 = local;
 	local = TID.size();
+	arguments();
+	Check(")");
 	block();
 	deltill(local);
 	local = local_1;
 }
 void arguments() {
+	Type type;
 	if (lex.name == "int" || lex.name == "double" || lex.name == "bool" ||
 		lex.name == "string" || lex.name == "char") {
+		if (lex.name == "int") {
+			type = integer;
+		}
+		else if (lex.name == "double") {
+			type = real;
+		}
+		else if (lex.name == "bool") {
+			type = boolean;
+		}
+		else if (lex.name == "string") {
+			type = str;			
+		}
 		in >> lex;
-		variable();
+		
+		Check("$");
+		if (lex.id != 2) ERROR("name");
+		addId(type,lex.name,"");
+		in >> lex;
+		
 		while (lex.name == ",") {
 			in >> lex;
 			if (lex.name == "int" || lex.name == "double" || lex.name == "bool" ||
 				lex.name == "string" || lex.name == "char") {
+				if (lex.name == "int") {
+					type = integer;
+				}
+				else if (lex.name == "double") {
+					type = real;
+				}
+				else if (lex.name == "bool") {
+					type = boolean;
+				}
+				else if (lex.name == "string") {
+					type = str;
+				}
 				in >> lex;
-				variable();
+				Check("$");
+				if (lex.id != 2) ERROR("name");
+				addId(type, lex.name, "");
+				in >> lex;
 			}
 			else ERROR("type");
 		}
@@ -593,6 +625,6 @@ void Syntactic_analyser() {
 		return;
 	}
 	cout << "BUILD SUCCEEDED!\n";
-	system("pause");
+	
 
 }

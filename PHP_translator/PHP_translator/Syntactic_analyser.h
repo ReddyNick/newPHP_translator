@@ -115,7 +115,7 @@ struct Variable {
 	string value;
 };
 
-vector<Variable> TID;
+vector<Variable> TID;// read from the end
 void deltill(int till) {
 	for (int i = TID.size() - 1; i >= till; i--)
 		TID.pop_back();
@@ -384,6 +384,14 @@ bool Check_sign1(string str) {
 			flag = true;
 	return flag;
 }
+struct Pol {
+	string name = "";
+	int add = 0;
+};
+vector<Pol> Police;
+Pol a;
+
+
 
 // stops for Operator_s() function
 bool stop1(string lex) {

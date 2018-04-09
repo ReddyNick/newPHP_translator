@@ -6,10 +6,17 @@
 using namespace std;
 /*posfix opertaions checknot?????
 local variabl??
+#yet without functions in polise
+#without in/output
+# a+=b=c doesnt work! mistake in checkop
+#runpolice TID read from end
+# !F !G
 */
 #include"Syntactic_analyser.h"
-
+ofstream outPol("Files/Police.txt");
 void program() {
+	a.name = "{";
+	Police.push_back(a);
 	in >> lex;
 	Check("<");
 	Check("?");
@@ -17,6 +24,8 @@ void program() {
 	Operator_s(stop1);
 	if (lex.name != ">")
 		cout << "WOOOPS! '>' expected.\n";
+	a.name = "}";
+	Police.push_back(a);
 }
 
 void Operator_s(bool(*stop)(string)) {
@@ -45,7 +54,11 @@ void Operator() {
 			else {
 				expression();
 				clearst();
-				if (!mark) Check(";");
+				if (!mark) { 
+					Check(";"); 
+					a.name = ";";
+					Police.push_back(a);
+				}
 				else
 					mark = false;
 			}
@@ -73,15 +86,24 @@ void variable_definition() {
 		Check("$");
 		if (lex.id != 2) ERROR("name");
 		addId(type, lex.name, "");
+		a.name = "$" + lex.name;
+			Police.push_back(a);
+		
 		in >> lex;
 		if (lex.name == "=") {
 			pushOp("=");
+			string oper = "=";
 			in >> lex;
 			unempty_expression();
+			a.name = oper;
+				Police.push_back(a);
+			
 			clearst();
 		}
-	} while (lex.name == ",");
+		a.name = lex.name;
+		Police.push_back(a);
 
+	} while (lex.name == ",");
 	if (!stacky.empty())
 		stacky.pop();
 	Check(";");
@@ -89,14 +111,22 @@ void variable_definition() {
 void expression() {
 	if (lex.name == "$" || lex.name == "(" || lex.id == 3 || lex.id == 2)
 		unempty_expression();
+
 }
 void unempty_expression() {
+	vector<string> signs;
 	Priority2();
 	while (Check_sign1(lex.name)) {
 		pushOp(lex.name);
+		string oper = lex.name;
+		signs.push_back(lex.name);
 		in >> lex;
 		Priority2();
 		checkOp();
+	}
+	for (int i = signs.size() - 1; i >= 0; i--) {
+		a.name = signs[i];
+		Police.push_back(a);
 	}
 }
 void Priority2() {
@@ -106,6 +136,8 @@ void Priority2() {
 		in >> lex;
 		Priority3();
 		checkOp();
+		a.name = "||";
+		Police.push_back(a);
 	}
 }
 void Priority3() {
@@ -115,6 +147,8 @@ void Priority3() {
 		in >> lex;
 		Priority4();
 		checkOp();
+		a.name = "&&";
+		Police.push_back(a);
 	}
 }
 void Priority4() {
@@ -123,7 +157,8 @@ void Priority4() {
 		pushOp(lex.name);
 		in >> lex;
 		Priority5();
-		checkOp();
+		checkOp(); a.name = "|";
+		Police.push_back(a);
 	}
 }
 void Priority5() {
@@ -133,6 +168,8 @@ void Priority5() {
 		in >> lex;
 		Priority6();
 		checkOp();
+		a.name = "^";
+		Police.push_back(a);
 	}
 }
 void Priority6() {
@@ -142,6 +179,8 @@ void Priority6() {
 		in >> lex;
 		Priority7();
 		checkOp();
+		a.name = "&";
+		Police.push_back(a);
 	}
 }
 void Priority7() {
@@ -152,9 +191,12 @@ void Priority7() {
 		lex.name == "!==" ||
 		lex.name == "<=>") {
 		pushOp(lex.name);
+		string oper = lex.name;
 		in >> lex;
 		Priority8();
 		checkOp();
+		a.name = oper;
+		Police.push_back(a);
 	}
 }
 void Priority8() {
@@ -164,9 +206,12 @@ void Priority8() {
 		lex.name == "<=" ||
 		lex.name == ">=") {
 		pushOp(lex.name);
+		string oper = lex.name;
 		in >> lex;
 		Priority9();
 		checkOp();
+		a.name = oper;
+		Police.push_back(a);
 	}
 }
 void Priority9() {
@@ -174,9 +219,12 @@ void Priority9() {
 	while (lex.name == "<<" ||
 		lex.name == ">>") {
 		pushOp(lex.name);
+		string oper = lex.name;
 		in >> lex;
 		Priority10();
 		checkOp();
+		a.name = oper;
+		Police.push_back(a);
 	}
 }
 void Priority10() {
@@ -185,9 +233,12 @@ void Priority10() {
 		lex.name == "-" ||
 		lex.name == ".") {
 		pushOp(lex.name);
+		string oper = lex.name;
 		in >> lex;
 		Priority11();
 		checkOp();
+		a.name = oper;
+		Police.push_back(a);
 	}
 }
 void Priority11() {
@@ -196,17 +247,23 @@ void Priority11() {
 		lex.name == "/" ||
 		lex.name == "%") {
 		pushOp(lex.name);
+		string oper = lex.name;
 		in >> lex;
 		Priority12();
 		checkOp();
+		a.name = oper;
+		Police.push_back(a);
 	}
 }
 void Priority12() {
 	if (lex.name == "!") {
 		pushOp(lex.name);
+		string oper = lex.name;
 		in >> lex;
 		Priority13();
 		checkNot();
+		a.name = oper;
+		Police.push_back(a);
 	}
 	else
 		Priority13();
@@ -215,17 +272,23 @@ void Priority13() {
 	if (lex.name == "++" ||
 		lex.name == "--") {
 		pushOp(lex.name);
+		string oper = lex.name;
 		in >> lex;
 		Priority14();
 		checkNot();
+		a.name = "pre" + oper;
+		Police.push_back(a);
 	}
 	else {
 		Priority14();
 		if (lex.name == "++" ||
 			lex.name == "--") {
 			pushOp(lex.name);
+			string oper = lex.name;
 			in >> lex;
 			checkNot();
+			a.name = "post" + oper;
+			Police.push_back(a);
 		}
 	}
 }
@@ -236,6 +299,8 @@ void Priority14() {
 		in >> lex;
 		Priority15();
 		checkOp();
+		a.name = "**";
+		Police.push_back(a);
 	}
 }
 void Priority15() {
@@ -266,12 +331,18 @@ void Priority15() {
 						}
 						pushType(integer);
 					}
+					a.name = lex.name;
+						Police.push_back(a);
+				
 					in >> lex;
 			}
 			else
 				if (lex.id == 2) { // if name
+					a.name = lex.name;
+					Police.push_back(a);
 					in >> lex;
 					if (lex.name == ":") {
+						Police[Police.size() - 1].name += ":";
 						in >> lex;
 						mark = true;
 					}
@@ -304,15 +375,28 @@ void variable() {
 	Check("$");
 	if (lex.id != 2) ERROR("name");
 	pushType(checkId(lex.name));
+	a.name = "$" + lex.name;
+	Police.push_back(a);
 	in >> lex;
 }
 
 
 void block() {
 	if (lex.name == "{") {
+		int local_1 = local;
+		local = TID.size();
+
+		a.name = "{";
+		Police.push_back(a);
 		in >> lex;
 		Operator_s(stop2);
+		deltill(local);
+		local = local_1;
+
+		a.name = "}";
+		Police.push_back(a);
 		in >> lex;
+		
 	}
 	else
 		Operator();
@@ -403,24 +487,44 @@ void Case(Type type1) {
 		}
 	}
 }
-
 void conditional_operator() {
+	int address;
 	in >> lex;
 	Check("(");
 	unempty_expression();
 	if (!stacky.empty())
-		if (stacky.size() != 1 || stacky.top().type != boolean)throw(3);
+		if (stacky.size() != 1 || stacky.top().type != boolean) throw(3);
 	while (!stacky.empty())
 		stacky.pop();
 	Check(")");
+	address = Police.size();
+	a.name = "@";
+	Police.push_back(a);
+	a.name = "!F";
+	Police.push_back(a);
 	if (lex.name == "{") {
 		block();
+		Police[address].add = Police.size()+2;
+		address = Police.size();
+		a.name = "@";
+		Police.push_back(a);
+		a.name = "!E";
+		Police.push_back(a);
 		Else();
+		Police[address].add = Police.size();
+
 	}
 	else {
 		if (lex.name == "else") ERROR(";");
 		Operator_s(stop4);
+		Police[address].add = Police.size() + 2;
+		address = Police.size();
+		a.name = "@";
+		Police.push_back(a);
+		a.name = "!E";
+		Police.push_back(a);
 		Else1();
+		Police[address].add = Police.size();
 	}
 }
 void Else() {
@@ -441,6 +545,8 @@ void Else1() {
 	local = local_1;
 	Check("endif");
 	Check(";");
+	a.name = ";";
+		Police.push_back(a);
 }
 
 void cycle_operator() {
@@ -626,5 +732,12 @@ void Syntactic_analyser() {
 	}
 	cout << "BUILD SUCCEEDED!\n";
 	
+	for (int i = 0; i < Police.size(); i++) {
+		outPol << Police[i].name << " ";
+		if (Police[i].name == ";")
+			outPol << "\n";
+		if (Police[i].name == "@")
+			outPol << Police[i].add<<" ";
+	}
 
 }

@@ -57,7 +57,7 @@ void function_definition();
 void arguments();
 void gotos_children();
 
-static ifstream in("Files/Lexout.txt");
+static ifstream in("C:\\Users\\tretiakova\\Source\\Repos\\newPHP_translator\\PHP_translator\\PHP_translator\\Files\\Lexout.txt");
 struct lexem {
 	int id;
 	string name;
@@ -384,12 +384,6 @@ bool Check_sign1(string str) {
 			flag = true;
 	return flag;
 }
-struct Pol {
-	string name = "";
-	int add = 0;
-};
-vector<Pol> Police;
-Pol a;
 
 
 
@@ -429,6 +423,8 @@ void Check(string str) {
 		ERROR(str);
 
 }
+
+
 struct Marky {
 	string name="";
 	int add = 0, gotoadd = 0;

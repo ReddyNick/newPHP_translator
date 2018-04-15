@@ -1,4 +1,4 @@
-#include<iostream>
+#include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -24,7 +24,17 @@ local variabl??
 	goto yeahhh
 */
 #include"Syntactic_analyser.h"
-ofstream outPol("Files/Police.txt");
+void f() {
+	cout << 6;
+}
+struct Pol {
+	string name = "";
+	int add = 0;
+};
+vector<Pol> Police;
+Pol a;
+int hh = 1234;
+ofstream outPol("C:\\Users\\tretiakova\\Source\\Repos\\newPHP_translator\\PHP_translator\\PHP_translator\\Files\\Police.txt");
 void program() {
 	a.name = "{";
 	Police.push_back(a);
@@ -986,8 +996,8 @@ void Syntactic_analyser() {
 		outPol << Police[i].name << " ";
 		if (Police[i].name == ";")
 			outPol << "\n";
-		if (Police[i].name == "@")
-			outPol << Police[i].add<<" ";
+		/*if (Police[i].name == "@")
+			outPol << Police[i].add<<" ";*/
 	}
 	
 	while (M != nullptr) {
@@ -1007,7 +1017,320 @@ void Syntactic_analyser() {
 
 	//cout << "name: " << F->name << "\n addre: " << F->add;
 	
+}
 
+vector<Variable> ptid;
+vector<int> depth;
 
+int find_variable(string name) {
+	for (int i = ptid.size() - 1; i >= 0; i--) {
+		if (ptid[i].name == name) {
+			return i;
+		}
+	}
+	return -1;
+}
 
+stack<Variable> expr;
+void clean_stack_expr() {
+	while (!expr.empty()) {
+		expr.pop();
+	}
+}
+
+int convert_to_int(string number) {
+	int ans = 0;
+	bool negative = false;
+	if (number[0] == '-') {
+		negative = true;
+	}
+	for (int i = 0; i < number.length(); i++) {
+		if (negative) {
+			continue;
+		}
+		ans *= 10;
+		ans += (number[i] - '0');
+	}
+	if (negative) {
+		ans *= -1;
+	}
+	return ans;
+}
+
+vector<string> func_values;
+int after_func_address;
+int func_iterator = 0;
+
+void Run_police() {
+	for (int i = 0; i < Police.size(); i++) {
+		if (Police[i].name == "Fcall") {
+			int func_address = Police[i - 1].add;
+			depth.push_back(0);
+			i++;
+			while (i < Police.size() && Police[i].name != "@") {
+				if (Police[i].name != ",") {
+					if (Police[i].name[0] <= '9' && Police[i].name[0] >= '0') {
+						func_values.push_back(Police[i].name);
+					}
+					else {
+						func_values.push_back(ptid[find_variable(Police[i].name)].value);
+					}
+				}
+				i++;
+			}
+			for (int j = 0; j < func_values.size(); j++) {
+				outPol << func_values[j] << " ";
+			}
+			after_func_address = Police[i].add;
+			i = func_address - 1;
+			continue;
+		}
+		if (Police[i].name == "initF") {
+			
+			depth[depth.size() - 1]++;
+			Variable vrb = expr.top();
+			vrb.value = func_values[func_iterator];
+			ptid.push_back(vrb);
+			func_iterator++;
+			continue;
+		}
+		if (Police[i].name == "endf") {
+			func_iterator = 0;
+			while (depth[depth.size() - 1] > 0) {
+				ptid.pop_back();
+				depth[depth.size() - 1]--;
+			}
+			depth.pop_back();
+			clean_stack_expr();
+			i = after_func_address - 1;
+			/*for (int j = 0; j < func_values.size(); j++) {
+				func_values.pop_back();
+			}*/
+			continue;
+		}
+		if (Police[i].name == "{") {
+			depth.push_back(0);
+			continue;
+		}
+		if (Police[i].name == "}") {
+			outPol << '\n';
+			for (int j = 0; j < ptid.size(); j++) {
+				outPol << ptid[j].name << "=" << ptid[j].value << "; ";
+			}
+			while (depth[depth.size() - 1] > 0) {
+				ptid.pop_back();
+				depth[depth.size() - 1]--;
+			}
+			depth.pop_back();
+			clean_stack_expr();
+			continue;
+		}
+		if (Police[i].name == "<") {
+			Variable vrb2 = expr.top();
+			expr.pop();
+			Variable vrb1 = expr.top();
+			expr.pop();
+			if (convert_to_int(vrb1.value) < convert_to_int(vrb2.value)) {
+				vrb1.value = "true";
+			}
+			else {
+				vrb1.value = "false";
+			}
+			expr.push(vrb1);
+		}
+		if (Police[i].name == ">") {
+			Variable vrb2 = expr.top();
+			expr.pop();
+			Variable vrb1 = expr.top();
+			expr.pop();
+			if (convert_to_int(vrb1.value) > convert_to_int(vrb2.value)) {
+				vrb1.value = "true";
+			}
+			else {
+				vrb1.value = "false";
+			}
+			expr.push(vrb1);
+		}
+		if (Police[i].name == "<=") {
+			Variable vrb2 = expr.top();
+			expr.pop();
+			Variable vrb1 = expr.top();
+			expr.pop();
+			string value1 = ptid[find_variable(vrb1.name)].value;
+			if (convert_to_int(vrb1.value) <= convert_to_int(vrb2.value)) {
+				vrb1.value = "true";
+			}
+			else {
+				vrb1.value = "false";
+			}
+			expr.push(vrb1);
+			continue;
+		}
+		if (Police[i].name == ">=") {
+			Variable vrb2 = expr.top();
+			expr.pop();
+			Variable vrb1 = expr.top();
+			expr.pop();
+			if (convert_to_int(vrb1.value) >= convert_to_int(vrb2.value)) {
+				vrb1.value = "true";
+			}
+			else {
+				vrb1.value = "false";
+			}
+			expr.push(vrb1);
+		}
+		if (Police[i].name == "==") {
+			Variable vrb2 = expr.top();
+			expr.pop();
+			Variable vrb1 = expr.top();
+			expr.pop();
+			if (vrb1.value == vrb2.value) {
+				vrb1.value = "true";
+			}
+			else {
+				vrb1.value = "false";
+			}
+			expr.push(vrb1);
+		}
+		if (Police[i].name[0] == '$') {
+			Variable vrb;
+			vrb.name = Police[i].name;
+			if (find_variable(vrb.name) != -1) {
+				vrb.value = ptid[find_variable(vrb.name)].value;
+			}
+			expr.push(vrb);
+			continue;
+		}
+		if (Police[i].name == "init") {
+			depth[depth.size() - 1]++;
+			Variable vrb = expr.top();
+			ptid.push_back(vrb);
+			continue;
+		}
+		if (Police[i].name == "@") {
+			if (Police[i + 1].name == "!E") {
+				i = Police[i].add - 1;  //  ??
+				clean_stack_expr();
+				continue;  //  ??
+			}
+			if (Police[i + 1].name == "!F") {
+				if (expr.top().value == "false") {
+					i = Police[i].add - 1;  //  ??
+					clean_stack_expr();
+					continue;
+					expr.pop();
+					clean_stack_expr();
+				}
+				continue;
+			}
+		}
+		if (Police[i].name == ",") {
+			if (!expr.empty())
+				expr.pop();
+			continue;
+		}
+		if (Police[i].name == ";") {
+			clean_stack_expr();
+			continue;
+		}
+		if (Police[i].name == "+") {
+			Variable vrb;
+			vrb = expr.top();
+			string value2 = ptid[find_variable(vrb.name)].value;
+			expr.pop();
+			vrb = expr.top();
+			vrb = ptid[find_variable(vrb.name)];
+			expr.pop();
+			vrb.value = to_string(convert_to_int(vrb.value) 
+					+ convert_to_int(value2));
+			expr.push(vrb);
+			continue;
+		}
+		if (Police[i].name == "post++") {
+			Variable vrb = expr.top();
+			int target = find_variable(vrb.name);
+			ptid[target].value = to_string(convert_to_int(ptid[target].value)
+				+ 1);
+		}
+		if (Police[i].name == "pre++") {
+			Variable vrb = expr.top();
+			expr.pop();
+			int target = find_variable(vrb.name);
+			ptid[target].value = to_string(convert_to_int(ptid[target].value)
+				+ 1);
+			expr.push(ptid[target]);
+		}
+		if (Police[i].name == "post--") {
+			Variable vrb = expr.top();
+			int target = find_variable(vrb.name);
+			ptid[target].value = to_string(convert_to_int(ptid[target].value)
+				- 1);
+		}
+		if (Police[i].name == "pre--") {
+			Variable vrb = expr.top();
+			expr.pop();
+			int target = find_variable(vrb.name);
+			ptid[target].value = to_string(convert_to_int(ptid[target].value)
+				- 1);
+			expr.push(ptid[target]);
+		}
+		if (Police[i].name == "-") {
+			Variable vrb;
+			vrb = expr.top();
+			string value2 = ptid[find_variable(vrb.name)].value;
+			expr.pop();
+			vrb = expr.top();
+			vrb = ptid[find_variable(vrb.name)];
+			expr.pop();
+			vrb.value = to_string(convert_to_int(vrb.value)
+				- convert_to_int(value2));
+			expr.push(vrb);
+			continue;
+		}
+		if (Police[i].name == "*") {
+			Variable vrb;
+			vrb = expr.top();
+			string value2 = ptid[find_variable(vrb.name)].value;
+			expr.pop();
+			vrb = expr.top();
+			vrb = ptid[find_variable(vrb.name)];
+			expr.pop();
+			vrb.value = to_string(convert_to_int(vrb.value)
+				* convert_to_int(value2));
+			expr.push(vrb);
+			continue;
+		}
+		if (Police[i].name == "/") {
+			Variable vrb;
+			vrb = expr.top();
+			string value2 = ptid[find_variable(vrb.name)].value;
+			expr.pop();
+			vrb = expr.top();
+			vrb = ptid[find_variable(vrb.name)];
+			expr.pop();
+			vrb.value = to_string(convert_to_int(vrb.value)
+				/ convert_to_int(value2));
+			expr.push(vrb);
+			continue;
+		}
+		if (Police[i].name == "=") {
+			string value2;
+			value2 = (expr.top()).value;
+			expr.pop();
+			Variable vrb;
+			vrb = expr.top();
+			expr.pop();
+			int target_variable = find_variable(vrb.name);
+			ptid[target_variable].value = value2;
+			ptid[target_variable].name = vrb.name;
+			expr.push(ptid[target_variable]);
+			continue;
+		}
+		if (Police[i].name[0] >= '0' && Police[i].name[0] <= '9') {
+			Variable vrb;
+			vrb.value = Police[i].name;
+			expr.push(vrb);
+		}
+	}
+	
 }

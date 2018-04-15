@@ -22,7 +22,7 @@ case "Sat":
         break;
 default:
 	break;
-}
+} 
 
 
 while($x - 6 === $y || $y <= $x){

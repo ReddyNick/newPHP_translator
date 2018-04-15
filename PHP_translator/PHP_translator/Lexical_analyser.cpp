@@ -18,7 +18,9 @@ enum states {
 };
 
 bool IsOperation(char x) {
-	ifstream fin("Files\\Operations.txt");
+	ofstream out("aa.txt");
+	out << "hey";
+	ifstream fin("C:\\Users\\tretiakova\\Source\\Repos\\newPHP_translator\\PHP_translator\\PHP_translator\\Files\\Operations.txt");
 	string a;
 	for (fin >> a; a.length() < 2; fin >> a) {
 		if (a[0] == x) {
@@ -29,7 +31,7 @@ bool IsOperation(char x) {
 }
 
 bool IsSign(char x) {
-	ifstream fin("Files\\Signs.txt");
+	ifstream fin("C:\\Users\\tretiakova\\Source\\Repos\\newPHP_translator\\PHP_translator\\PHP_translator\\Files\\Signs.txt");
 	int a;
 	for (a = fin.get(); !fin.eof(); fin.get(), a = fin.get()) {
 		if (a == x) {
@@ -40,7 +42,7 @@ bool IsSign(char x) {
 }
 
 bool IsFinalOperation(string s) {
-	ifstream fin("Files\\Operations.txt");
+	ifstream fin("C:\\Users\\tretiakova\\Source\\Repos\\newPHP_translator\\PHP_translator\\PHP_translator\\Files\\Operations.txt");
 	string a;
 	for (fin >> a; !fin.eof(); fin.get(), fin >> a) {
 		if (a == s) {
@@ -54,7 +56,7 @@ bool IsFinalOperation(string s) {
 }
 
 bool IsWord(string s) {
-	ifstream fin("Files\\Words.txt");
+	ifstream fin("C:\\Users\\tretiakova\\Source\\Repos\\newPHP_translator\\PHP_translator\\PHP_translator\\Files\\Words.txt");
 	string a;
 	for (fin >> a; !fin.eof(); fin.get(), fin >> a) {
 		if (a == s) {
@@ -68,8 +70,8 @@ bool IsWord(string s) {
 }
 
 int Lexical_analyser() {
-	ifstream fin("Files\\Program.txt");
-	ofstream fout("Files\\Lexout.txt");
+	ifstream fin("C:\\Users\\tretiakova\\Source\\Repos\\newPHP_translator\\PHP_translator\\PHP_translator\\Files\\Program.txt");
+	ofstream fout("C:\\Users\\tretiakova\\Source\\Repos\\newPHP_translator\\PHP_translator\\PHP_translator\\Files\\Lexout.txt");
 	char x, a;
 	string s;
 	int strings = 0;

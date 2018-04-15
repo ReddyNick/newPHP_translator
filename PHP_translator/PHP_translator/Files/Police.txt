@@ -1,13 +1,10 @@
-{ $c init 2 = , $year init , $a init , $b init , $i init , $j init ; 
-@ 44 !E $s initF , $d initF { $s $s $d + = ; 
-@ 23 Fcall $s , $d @ 41 ; 
-} endf @ 23 Fcall 3 , 4 @ 50 ; 
-$year 100 % 0 != true && @ 67 !F { $year post++ ; 
-} @ 72 !E { $year pre++ ; 
-} $i 1 = ; 
-$i 3 <= @ 121 !F @ 88 !E ; 
-$i post++ @ 76 !E { $j 1 = ; 
-$j 3 <= @ 118 !F @ 105 !E ; 
-$j post++ @ 93 !E { $c $a $b + = ; 
-$c post-- ; 
-} @ 101 !E } @ 84 !E } 
+{ $i init 8 = ; 
+$a init 5 = , $b init 5 = , $c init ; 
+@ !E $num1 initF , $num2 initF { $c $num1 $num2 + = ; 
+} endf $i 3 <= @ !F { $i post++ ; 
+} @ !E { } ; 
+@ Fcall 3 , $i @ ; 
+} 
+$i=8; $a=5; $b=5; $c=; 3 8 
+$i=8; $a=5; $b=5; $c=11; $num1=3; $num2=8; 
+$i=8; $a=5; $b=5; $c=11; 

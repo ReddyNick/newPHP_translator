@@ -7,10 +7,21 @@ using namespace std;
 /*posfix opertaions checknot?????
 local variabl??
 #yet without functions in polise
-#without in/output
-# a+=b=c doesnt work! mistake in checkop
+#without in/output output echo operation
+# a+=b=c doesnt work! mistake in checkop(there is no "+=" )
+#  "The number is " . $i . "<br>" (there is no "." )
 #runpolice TID read from end
-# !F !G
+# !F !E
+#without CASE, ?? endfor ...,endwhile and so on
+# without $c=f($a,$b);
+# dont work for(int $i=1; with "int"
+*/
+
+
+
+
+/*COOOL
+	goto yeahhh
 */
 #include"Syntactic_analyser.h"
 ofstream outPol("Files/Police.txt");
@@ -30,6 +41,7 @@ void program() {
 
 void Operator_s(bool(*stop)(string)) {
 	while (!stop(lex.name) && !in.eof()) {
+		
 		Operator();
 	}
 }
@@ -88,7 +100,8 @@ void variable_definition() {
 		addId(type, lex.name, "");
 		a.name = "$" + lex.name;
 			Police.push_back(a);
-		
+			a.name = "init";
+			Police.push_back(a);
 		in >> lex;
 		if (lex.name == "=") {
 			pushOp("=");
@@ -109,8 +122,10 @@ void variable_definition() {
 	Check(";");
 }
 void expression() {
-	if (lex.name == "$" || lex.name == "(" || lex.id == 3 || lex.id == 2)
+
+	if (lex.name == "$" || lex.name == "(" || lex.id == 3 || lex.id == 2 || lex.name == "--" || lex.name == "++") {
 		unempty_expression();
+	}
 
 }
 void unempty_expression() {
@@ -232,13 +247,16 @@ void Priority10() {
 	while (lex.name == "+" ||
 		lex.name == "-" ||
 		lex.name == ".") {
+		
 		pushOp(lex.name);
 		string oper = lex.name;
 		in >> lex;
 		Priority11();
 		checkOp();
+		
 		a.name = oper;
 		Police.push_back(a);
+		
 	}
 }
 void Priority11() {
@@ -256,6 +274,7 @@ void Priority11() {
 	}
 }
 void Priority12() {
+	
 	if (lex.name == "!") {
 		pushOp(lex.name);
 		string oper = lex.name;
@@ -269,6 +288,7 @@ void Priority12() {
 		Priority13();
 }
 void Priority13() {
+	
 	if (lex.name == "++" ||
 		lex.name == "--") {
 		pushOp(lex.name);
@@ -335,33 +355,80 @@ void Priority15() {
 						Police.push_back(a);
 				
 					in >> lex;
+				
 			}
 			else
 				if (lex.id == 2) { // if name
 					a.name = lex.name;
-					Police.push_back(a);
+					//Police.push_back(a);
 					in >> lex;
 					if (lex.name == ":") {
-						Police[Police.size() - 1].name += ":";
+						if (M == nullptr) {
+							M = new Marky;
+							M->name = a.name;
+							M->add = Police.size();
+							End = M;
+						}
+						else {
+							
+							Marky *ptr = M;
+							while (ptr != nullptr && ptr->name != a.name)
+								ptr = ptr->next;
+							
+							if (ptr == nullptr) {
+								ptr = new Marky;
+								ptr->name = a.name;
+								ptr->add = Police.size();
+								End->next = ptr;
+								End = ptr;
+							}
+							else {
+								//cout << ptr->gotoadd<<"ty";
+								Police[ptr->gotoadd].add = Police.size();
+							}
+							
+							//ptr = nullptr;
+							//delete ptr;
+						}
+							
 						in >> lex;
 						mark = true;
 					}
-					else
+					else {
 						functioncall();
+						
+					}
 				}
 				else ERROR("an operator"); //??!!
 }
 
 
 void functioncall() {
+	
+	FUN*ptr = F;
+	while (ptr->name != a.name)
+		ptr = ptr->next;
+	
+	a.name = "@";
+	a.add = ptr->add;
+	Police.push_back(a);
+	a.name = "Fcall";
+	Police.push_back(a);
 	Check("(");
 	parameters();
 	Check(")");
+
+	a.name = "@";
+	a.add = Police.size() + 1;
+	Police.push_back(a);
+
 }
 void parameters() {
 	unempty_expression();
 	clearst();
 	while (lex.name == ",") {
+		a.name = ",";
+		Police.push_back(a);
 		in >> lex;
 		unempty_expression();
 		clearst();
@@ -393,6 +460,8 @@ void block() {
 		deltill(local);
 		local = local_1;
 
+		
+
 		a.name = "}";
 		Police.push_back(a);
 		in >> lex;
@@ -403,10 +472,16 @@ void block() {
 }
 
 void output_operator() {
+
 	in >> lex;
+	
 	expression();
+	a.name = "echo";
+	Police.push_back(a);
 	clearst();
 	Check(";");
+	a.name = ";";
+	Police.push_back(a);
 }
 
 void special_operator() {
@@ -548,8 +623,12 @@ void Else1() {
 	a.name = ";";
 		Police.push_back(a);
 }
-
+int cycledepth = 0;
+vector<int> cyclebreak;
+vector<int> cyclecontinue;
 void cycle_operator() {
+	int cycontinue = Police.size();
+	cycledepth++;
 	if (lex.name == "while") {
 		in >> lex;
 		While();
@@ -562,9 +641,19 @@ void cycle_operator() {
 		in >> lex;
 		For();
 	}
+	cycledepth--;
+	if (!cyclebreak.empty()) {
+		Police[cyclebreak[cyclebreak.size() - 1]].add = Police.size();
+		cyclebreak.pop_back();
+	}
+	if (!cyclecontinue.empty()) {
+		Police[cyclecontinue[cyclecontinue.size() - 1]].add = cycontinue;
+		cyclecontinue.pop_back();
+	}
 }
 void While() {
 	Check("(");
+	int whileadd = Police.size();
 	unempty_expression();
 	if (!stacky.empty())
 		if (stacky.size() != 1 || stacky.top().type != boolean) throw(3);
@@ -573,10 +662,22 @@ void While() {
 	Check(")");
 	int local_1 = local;
 	local = TID.size();
+
+	int address = Police.size();
+	a.name = "@";
+	Police.push_back(a);
+	a.name = "!F";
+	Police.push_back(a);
 	if (lex.name == "{") {
 		block();
 		deltill(local);
 		local = local_1;
+		Police[address].add = Police.size() + 2;
+		a.name = "@";
+		a.add = whileadd;
+		Police.push_back(a);
+		a.name = "!E";
+		Police.push_back(a);
 	}
 	else {
 		if (lex.name == "endwhile") ERROR("an operator");
@@ -584,12 +685,21 @@ void While() {
 		deltill(local);
 		local = local_1;
 		Check("endwhile");
+		Police[address].add = Police.size() + 2;
+		a.name = "@";
+		a.add = whileadd;
+		Police.push_back(a);
+		a.name = "!E";
+		Police.push_back(a);
 		Check(";");
+		a.name = ";";
+		Police.push_back(a);
 	}
 }
 void DoWhile() {
 	int local_1 = local;
 	local = TID.size();
+	int address = Police.size();
 	block();
 	deltill(local);
 	local = local_1;
@@ -601,42 +711,106 @@ void DoWhile() {
 	while (!stacky.empty())
 		stacky.pop();
 	Check(")");
+	a.name = "@";
+	a.add = address;
+	Police.push_back(a);
+	a.name = "!F";
+	Police.push_back(a);
+
 }
+
 void For() {
+	int Foradd1, Foradd0, Foradd2;
 	int local_1 = local;
 	local = TID.size();
 	Check("(");
-	For_condition();
+	For_condition(Foradd1,Foradd0,Foradd2);
 	Check(")");
+	Police[Foradd0].add = Police.size();
 	if (lex.name == "{") {
 		block();
 		deltill(local);
 		local = local_1;
+		a.name = "@";
+		a.add = Foradd2;
+		Police.push_back(a);
+		a.name = "!E";
+		Police.push_back(a);
 	}
 	else {
 		if (lex.name == "endwhile") ERROR("an operator");
 		Operator_s(stop7);
 		deltill(local);
 		local = local_1;
+		a.name = "@";
+		a.add = Foradd2;
+		Police.push_back(a);
+		a.name = "!E";
+		Police.push_back(a);
 		Check("endfor");
 		Check(";");
+		a.name = ";";
+		Police.push_back(a);
 	}
+	Police[Foradd1].add = Police.size();
 }
-void For_condition() {
+
+void For_condition(int& Foradd1, int& Foradd0, int& Foradd2) {
 	expression();
 	clearst();
 	Check(";");
+	a.name = ";";
+	Police.push_back(a);
+	int ForaddE=Police.size();
 	expression();
 	if (!stacky.empty())
 		if (stacky.size() != 1 || stacky.top().type != boolean) throw(3);
 	while (!stacky.empty())
 		stacky.pop();
+	Foradd1 = Police.size();
+	a.name = "@";
+	Police.push_back(a);
+	a.name = "!F";
+	Police.push_back(a);
+	Foradd0 = Police.size();
+	a.name = "@";
+	Police.push_back(a);
+	a.name = "!E";
+	Police.push_back(a);
+
 	Check(";");
+	a.name = ";";
+	Police.push_back(a);
+	Foradd2 = Police.size();
 	expression();
+	a.name = "@";
+	a.add = ForaddE;
+	Police.push_back(a);
+	a.name = "!E";
+	Police.push_back(a);
 	clearst();
 }
 
 void function_definition() {
+	FUN *ptr;
+	if (F == nullptr) {
+		F = new FUN;
+		F->name = lex.name;
+		F->add = Police.size() + 2;
+		endF = F;
+	}
+	else {
+		ptr = new FUN;
+		ptr->name = lex.name;
+		ptr->add = Police.size() + 2;
+		endF->next = ptr;
+		endF = ptr;
+	}
+	int end=Police.size();
+	a.name = "@";
+	Police.push_back(a);
+	a.name = "!E";
+	Police.push_back(a);
 	if (lex.id == 2)
 		in >> lex;
 	Check("(");
@@ -647,6 +821,10 @@ void function_definition() {
 	block();
 	deltill(local);
 	local = local_1;
+	a.name = "endf";
+	Police.push_back(a);
+	Police[end].add = Police.size();
+
 }
 void arguments() {
 	Type type;
@@ -669,9 +847,15 @@ void arguments() {
 		Check("$");
 		if (lex.id != 2) ERROR("name");
 		addId(type,lex.name,"");
+		a.name = "$" + lex.name;
+		Police.push_back(a);
+		a.name = "initF";
+		Police.push_back(a);
 		in >> lex;
 		
 		while (lex.name == ",") {
+			a.name = ",";
+			Police.push_back(a);
 			in >> lex;
 			if (lex.name == "int" || lex.name == "double" || lex.name == "bool" ||
 				lex.name == "string" || lex.name == "char") {
@@ -691,6 +875,10 @@ void arguments() {
 				Check("$");
 				if (lex.id != 2) ERROR("name");
 				addId(type, lex.name, "");
+				a.name = "$" + lex.name;
+				Police.push_back(a);
+				a.name = "initF";
+				Police.push_back(a);
 				in >> lex;
 			}
 			else ERROR("type");
@@ -705,12 +893,74 @@ void gotos_children() {
 		in >> lex;
 		expression();
 	}
-	else if (lex.name == "break") in >> lex;
-	else if (lex.name == "continue") in >> lex;
+		else 
+			if (lex.name == "break") { in >> lex; 
+		if (cycledepth > 0) {
+			cyclebreak.push_back(Police.size());
+			a.name = "@";
+			Police.push_back(a);
+			a.name = "!E";
+			Police.push_back(a);
+		}
+	}
+	else 
+		if (lex.name == "continue") { in >> lex; 
+	if (cycledepth > 0) {
+		cyclecontinue.push_back(Police.size());
+		a.name = "@";
+		Police.push_back(a);
+		a.name = "!E";
+		Police.push_back(a);
+	}
+	}
 	else {
+		
 		in >> lex;   // name
 		if (lex.id != 2) ERROR("name");
+		
+		Marky*ptr = M;
+		
+		while (ptr != nullptr && ptr->name != lex.name ) {
+			ptr = ptr->next;
+		}
+
+		if (ptr!=nullptr) {
+			a.name = "@";
+			a.add = ptr->add;
+			Police.push_back(a);
+			a.name = "!E";
+			Police.push_back(a);
+		}
+		else {
+			if (M == nullptr) {
+				
+				ptr = new Marky;
+				ptr->name = lex.name;
+				ptr->gotoadd = Police.size();
+				a.name = "@";
+				//a.add = ptr->add;
+				Police.push_back(a);
+				a.name = "!E";
+				Police.push_back(a);
+				M = ptr;
+				End = M;
+			}
+			else {
+				ptr = new Marky;
+				ptr->name = lex.name;
+				ptr->gotoadd = Police.size();
+				a.name = "@";
+				//a.add = ptr->add;
+				Police.push_back(a);
+				a.name = "!E";
+				Police.push_back(a);
+				End->next = ptr;
+				End = ptr;
+			}
+		}
+		//delete ptr;
 		in >> lex;
+		Check(";");
 	}
 }
 
@@ -739,5 +989,25 @@ void Syntactic_analyser() {
 		if (Police[i].name == "@")
 			outPol << Police[i].add<<" ";
 	}
+	
+	while (M != nullptr) {
+		Marky *ptr;
+		ptr = M;
+		M = M->next;
+		delete ptr;
+	}
+
+	while (F != nullptr) {
+		FUN *ptrf;
+		ptrf = F;
+		F = F->next;
+		
+		delete ptrf;
+	}
+
+	//cout << "name: " << F->name << "\n addre: " << F->add;
+	
+
+
 
 }

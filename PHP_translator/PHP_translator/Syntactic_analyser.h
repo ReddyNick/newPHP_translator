@@ -51,7 +51,7 @@ void cycle_operator();
 void While();
 void DoWhile();
 void For();
-void For_condition();
+void For_condition(int& Foradd1, int& Foradd0, int& Foradd2);
 
 void function_definition();
 void arguments();
@@ -429,5 +429,17 @@ void Check(string str) {
 		ERROR(str);
 
 }
+struct Marky {
+	string name="";
+	int add = 0, gotoadd = 0;
+	Marky* next = nullptr;
+};
+	Marky* M =nullptr, *End = nullptr;
 
+	struct FUN {
+		string name = "";
+		int add = 0;
+		FUN* next=nullptr;
+	};
+	FUN* F = nullptr, *endF = nullptr;
 #endif

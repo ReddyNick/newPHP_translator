@@ -1,12 +1,30 @@
 <?php 
-int $a, $b; 
+int $c=2,$year,$a,$b,$i,$j;
 
-if($a!=$b){ 
-	int $f; 
+
+function f(int $s,int $d){
+		$s=$s+$d;
+		f($s,$d);
+}
+
+
+
+f(3,4);
+
+
+
+if(($year % 100 != 0) && true){
+	$year++;
+} 
+else{
+	++$year;
+}
+
+for( $i=1; $i<=3; $i++){
+	for( $j=1; $j<=3; $j++){
+		$c=$a+$b;
+		$c--;
 	}
-	else {
-	$b++;
-	}
-	$a=4;
+}
 
 >

@@ -1,5 +1,13 @@
-{ $a , $b ; 
-$a $b != @ 16 !F { $f ; 
-} @ 21 !E { $b post++ ; 
-} $a 4 = ; 
-} 
+{ $c init 2 = , $year init , $a init , $b init , $i init , $j init ; 
+@ 44 !E $s initF , $d initF { $s $s $d + = ; 
+@ 23 Fcall $s , $d @ 41 ; 
+} endf @ 23 Fcall 3 , 4 @ 50 ; 
+$year 100 % 0 != true && @ 67 !F { $year post++ ; 
+} @ 72 !E { $year pre++ ; 
+} $i 1 = ; 
+$i 3 <= @ 121 !F @ 88 !E ; 
+$i post++ @ 76 !E { $j 1 = ; 
+$j 3 <= @ 118 !F @ 105 !E ; 
+$j post++ @ 93 !E { $c $a $b + = ; 
+$c post-- ; 
+} @ 101 !E } @ 84 !E } 

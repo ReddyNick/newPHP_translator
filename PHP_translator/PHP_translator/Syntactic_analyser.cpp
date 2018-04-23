@@ -17,9 +17,6 @@ local variabl??
 # dont work for(int $i=1; with "int"
 */
 
-
-
-
 /*COOOL
 	goto yeahhh
 */
@@ -1062,6 +1059,7 @@ int after_func_address;
 int func_iterator = 0;
 
 void Run_police() {
+	outPol << '\n';
 	for (int i = 0; i < Police.size(); i++) {
 		if (Police[i].name == "Fcall") {
 			int func_address = Police[i - 1].add;
@@ -1078,9 +1076,9 @@ void Run_police() {
 				}
 				i++;
 			}
-			for (int j = 0; j < func_values.size(); j++) {
+			/*for (int j = 0; j < func_values.size(); j++) {
 				outPol << func_values[j] << " ";
-			}
+			}*/
 			after_func_address = Police[i].add;
 			i = func_address - 1;
 			continue;
@@ -1300,7 +1298,7 @@ void Run_police() {
 			expr.push(vrb);
 			continue;
 		}
-		if (Police[i].name == "/") {
+		if (Police[i].name == "%") {
 			Variable vrb;
 			vrb = expr.top();
 			string value2 = ptid[find_variable(vrb.name)].value;
@@ -1309,7 +1307,7 @@ void Run_police() {
 			vrb = ptid[find_variable(vrb.name)];
 			expr.pop();
 			vrb.value = to_string(convert_to_int(vrb.value)
-				/ convert_to_int(value2));
+				% convert_to_int(value2));
 			expr.push(vrb);
 			continue;
 		}

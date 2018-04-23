@@ -1,10 +1,12 @@
-{ $i init 8 = ; 
-$a init 5 = , $b init 5 = , $c init ; 
-@ !E $num1 initF , $num2 initF { $c $num1 $num2 + = ; 
-} endf $i 3 <= @ !F { $i post++ ; 
-} @ !E { } ; 
-@ Fcall 3 , $i @ ; 
+{ $i init 1 = ; 
+$a init 0 = , $b init 5 = , $c init 0 = ; 
+@ !E $m initF , $p initF { $t init ; 
+@ !E $p 0 > @ !F { $t $p = ; 
+$p $m $p % = ; 
+$m $t = ; 
+} @ !E $a $m = ; 
+} endf @ Fcall 25 , 5 @ ; 
 } 
-$i=8; $a=5; $b=5; $c=; 3 8 
-$i=8; $a=5; $b=5; $c=11; $num1=3; $num2=8; 
-$i=8; $a=5; $b=5; $c=11; 
+
+$i=1; $a=0; $b=5; $c=0; $m=25; $p=5; $t=; 
+$i=1; $a=0; $b=5; $c=0; 

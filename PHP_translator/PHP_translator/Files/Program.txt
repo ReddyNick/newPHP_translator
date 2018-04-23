@@ -1,16 +1,23 @@
 <?php 
-int $i=8;
-int $a=5, $b=5, $c;
-function Sum(int $num1,int $num2){
-  $c = $num1 + $num2;
-}
-if ($i<=3) {
-	$i++;
-}
-else {
-};
-Sum(3,$i);
+int $i=1;
+int $a=0, $b=5, $c=0;
 
 
 
+function gcd(int $m,int $p) {
+	int $t;
+	goto mark;
+  while ($p > 0) {
+    $t = $p;
+    $p = $m % $p;
+    $m = $t;
+  }
+  
+  $a=$m;
+  mark:
+  }
+  gcd(25, 5);
+  
+
+  
 >
